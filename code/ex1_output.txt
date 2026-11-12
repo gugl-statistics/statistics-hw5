@@ -1,0 +1,79 @@
+sin      N=    11  R=2.006813453957 err 6.81e-03 (      11 evals,      0.0 ms)   L=2.004041583628 err 4.04e-03 (    2212 evals,      0.9 ms)
+sin      N=    31  R=2.000856101422 err 8.56e-04 (      31 evals,      0.0 ms)   L=2.000911797064 err 9.12e-04 (    4412 evals,      1.9 ms)
+sin      N=   101  R=2.000080628394 err 8.06e-05 (     101 evals,      0.0 ms)   L=2.000161535958 err 1.62e-04 (   12112 evals,      5.6 ms)
+sin      N=   301  R=2.000009077931 err 9.08e-06 (     301 evals,      0.0 ms)   L=2.000032061139 err 3.21e-05 (   34112 evals,     16.3 ms)
+sin      N=  1001  R=2.000000820825 err 8.21e-07 (    1001 evals,      0.1 ms)   L=2.000005354827 err 5.35e-06 (  111112 evals,     51.8 ms)
+sin      N=  3001  R=2.000000091324 err 9.13e-08 (    3001 evals,      0.5 ms)   L=2.000001038320 err 1.04e-06 (  331112 evals,    153.3 ms)
+sin      N= 10001  R=2.000000008223 err 8.22e-09 (   10001 evals,      1.3 ms)   L=2.000000171360 err 1.71e-07 ( 1101112 evals,    511.4 ms)
+x2       N=    11  R=0.332644628099 err 6.89e-04 (      11 evals,      0.0 ms)   L=0.331836518290 err 1.50e-03 (    1607 evals,      0.7 ms)
+x2       N=    31  R=0.333246618106 err 8.67e-05 (      31 evals,      0.0 ms)   L=0.333002240961 err 3.31e-04 (    2707 evals,      1.5 ms)
+x2       N=   101  R=0.333325164200 err 8.17e-06 (     101 evals,      0.0 ms)   L=0.333275389189 err 5.79e-05 (    6557 evals,      4.7 ms)
+x2       N=   301  R=0.333332413550 err 9.20e-07 (     301 evals,      0.0 ms)   L=0.333321903635 err 1.14e-05 (   17557 evals,     13.2 ms)
+x2       N=  1001  R=0.333333250166 err 8.32e-08 (    1001 evals,      0.2 ms)   L=0.333331431547 err 1.90e-06 (   56057 evals,     44.7 ms)
+x2       N=  3001  R=0.333333324080 err 9.25e-09 (    3001 evals,      0.5 ms)   L=0.333332965276 err 3.68e-07 (  166057 evals,    138.5 ms)
+x2       N= 10001  R=0.333333332500 err 8.33e-10 (   10001 evals,      1.5 ms)   L=0.333333272662 err 6.07e-08 (  551057 evals,    426.4 ms)
+step13   N=    11  R=2.090909090909 err 9.09e-02 (      11 evals,      0.0 ms)   L=2.045454545455 err 4.55e-02 (    1387 evals,      0.6 ms)
+step13   N=    31  R=2.032258064516 err 3.23e-02 (      31 evals,      0.0 ms)   L=1.983870967742 err 1.61e-02 (    2157 evals,      1.3 ms)
+step13   N=   101  R=2.009900990099 err 9.90e-03 (     101 evals,      0.0 ms)   L=2.004950495050 err 4.95e-03 (    4687 evals,      3.9 ms)
+step13   N=   301  R=2.003322259136 err 3.32e-03 (     301 evals,      0.0 ms)   L=1.998338870432 err 1.66e-03 (   12057 evals,     11.7 ms)
+step13   N=  1001  R=2.000999000999 err 9.99e-04 (    1001 evals,      0.2 ms)   L=2.000499500500 err 5.00e-04 (   37687 evals,     38.2 ms)
+step13   N=  3001  R=2.000333222259 err 3.33e-04 (    3001 evals,      0.5 ms)   L=1.999833388870 err 1.67e-04 (  111057 evals,    120.3 ms)
+step13   N= 10001  R=2.000099990001 err 1.00e-04 (   10001 evals,      1.7 ms)   L=2.000049995001 err 5.00e-05 (  367687 evals,    387.0 ms)
+abs      N=    11  R=0.247933884298 err 2.07e-03 (      11 evals,      0.0 ms)   L=0.250000000000 err 2.78e-17 (    2212 evals,      0.8 ms)
+abs      N=    31  R=0.249739854318 err 2.60e-04 (      31 evals,      0.0 ms)   L=0.250000000000 err 0.00e+00 (    4412 evals,      1.8 ms)
+abs      N=   101  R=0.249975492599 err 2.45e-05 (     101 evals,      0.0 ms)   L=0.250000000000 err 0.00e+00 (   12112 evals,      5.7 ms)
+abs      N=   301  R=0.249997240649 err 2.76e-06 (     301 evals,      0.0 ms)   L=0.250000000000 err 2.78e-17 (   34112 evals,     15.8 ms)
+abs      N=  1001  R=0.249999750499 err 2.50e-07 (    1001 evals,      0.2 ms)   L=0.250000000000 err 0.00e+00 (  111112 evals,     53.4 ms)
+abs      N=  3001  R=0.249999972241 err 2.78e-08 (    3001 evals,      0.5 ms)   L=0.250000000000 err 2.22e-16 (  331112 evals,    156.2 ms)
+abs      N= 10001  R=0.249999997500 err 2.50e-09 (   10001 evals,      1.6 ms)   L=0.250000000000 err 1.30e-15 ( 1101112 evals,    532.3 ms)
+invsqrt  N=    11  R=1.817788217893 err 1.82e-01 (      11 evals,      0.0 ms)   L=2.373432484489 err 3.73e-01 (    1607 evals,      0.7 ms)
+invsqrt  N=    31  R=1.891378672793 err 1.09e-01 (      31 evals,      0.0 ms)   L=2.025443841524 err 2.54e-02 (    2652 evals,      1.7 ms)
+invsqrt  N=   101  R=1.939812377610 err 6.02e-02 (     101 evals,      0.0 ms)   L=1.990793996446 err 9.21e-03 (    6282 evals,      5.0 ms)
+invsqrt  N=   301  R=1.965134451771 err 3.49e-02 (     301 evals,      0.1 ms)   L=1.998930472300 err 1.07e-03 (   16732 evals,     14.4 ms)
+invsqrt  N=  1001  R=1.980881003244 err 1.91e-02 (    1001 evals,      0.2 ms)   L=1.999902848390 err 9.72e-05 (   53307 evals,     43.0 ms)
+invsqrt  N=  3001  R=1.988957954768 err 1.10e-02 (    3001 evals,      0.5 ms)   L=1.999989195419 err 1.08e-05 (  157807 evals,    132.2 ms)
+invsqrt  N= 10001  R=1.993951316201 err 6.05e-03 (   10001 evals,      1.8 ms)   L=1.999999039364 err 9.61e-07 (  523557 evals,    461.4 ms)
+step10   N=    11  R=0.454545454545 err 4.55e-02 (      11 evals,      0.0 ms)   L=0.500000000000 err 0.00e+00 (    1607 evals,      0.6 ms)
+step10   N=    31  R=0.483870967742 err 1.61e-02 (      31 evals,      0.0 ms)   L=0.500000000000 err 0.00e+00 (    2707 evals,      1.4 ms)
+step10   N=   101  R=0.495049504950 err 4.95e-03 (     101 evals,      0.0 ms)   L=0.500000000000 err 0.00e+00 (    6557 evals,      4.3 ms)
+step10   N=   301  R=0.498338870432 err 1.66e-03 (     301 evals,      0.0 ms)   L=0.500000000000 err 0.00e+00 (   17557 evals,     14.1 ms)
+step10   N=  1001  R=0.499500499500 err 5.00e-04 (    1001 evals,      0.2 ms)   L=0.500000000000 err 0.00e+00 (   56057 evals,     44.1 ms)
+step10   N=  3001  R=0.499833388870 err 1.67e-04 (    3001 evals,      0.5 ms)   L=0.500000000000 err 0.00e+00 (  166057 evals,    140.9 ms)
+step10   N= 10001  R=0.499950005000 err 5.00e-05 (   10001 evals,      1.5 ms)   L=0.500000000000 err 0.00e+00 (  551057 evals,    426.9 ms)
+sinc     N=    11  R=1.853019877843 err 1.08e-03 (      11 evals,      0.0 ms)   L=1.854962177755 err 3.03e-03 (    1607 evals,      0.7 ms)
+sinc     N=    31  R=1.852073279942 err 1.36e-04 (      31 evals,      0.0 ms)   L=1.852666138797 err 7.29e-04 (    2707 evals,      1.5 ms)
+sinc     N=   101  R=1.851949884170 err 1.28e-05 (     101 evals,      0.0 ms)   L=1.852071215598 err 1.34e-04 (    6557 evals,      4.6 ms)
+sinc     N=   301  R=1.851938496777 err 1.44e-06 (     301 evals,      0.1 ms)   L=1.851964171224 err 2.71e-05 (   17557 evals,     13.9 ms)
+sinc     N=  1001  R=1.851937182621 err 1.31e-07 (    1001 evals,      0.2 ms)   L=1.851941630870 err 4.58e-06 (   56057 evals,     49.3 ms)
+sinc     N=  3001  R=1.851937066517 err 1.45e-08 (    3001 evals,      0.6 ms)   L=1.851937944678 err 8.93e-07 (  166057 evals,    144.8 ms)
+sinc     N= 10001  R=1.851937053291 err 1.31e-09 (   10001 evals,      1.9 ms)   L=1.851937199798 err 1.48e-07 (  551057 evals,    479.4 ms)
+
+Lebesgue: lower sum vs midpoint-level sum
+x2      M=    4  lower=0.2317169538 (err 1.02e-01)   mid=0.3270226030 (err 6.31e-03)
+x2      M=   16  lower=0.3051688031 (err 2.82e-02)   mid=0.3324633243 (err 8.70e-04)
+x2      M=   64  lower=0.3259166886 (err 7.42e-03)   mid=0.3332194968 (err 1.14e-04)
+x2      M=  256  lower=0.3314303260 (err 1.90e-03)   mid=0.3333187859 (err 1.45e-05)
+x2      M= 1024  lower=0.3328513565 (err 4.82e-04)   mid=0.3333314950 (err 1.84e-06)
+sin     M=    4  lower=1.5440239353 (err 4.56e-01)   mid=2.0164466760 (err 1.64e-02)
+sin     M=   16  lower=1.8932830306 (err 1.07e-01)   mid=2.0023692009 (err 2.37e-03)
+sin     M=   64  lower=1.9743483942 (err 2.57e-02)   mid=2.0003161378 (err 3.16e-04)
+sin     M=  256  lower=1.9937230618 (err 6.28e-03)   mid=2.0000407777 (err 4.08e-05)
+sin     M= 1024  lower=1.9984482339 (err 1.55e-03)   mid=2.0000051763 (err 5.18e-06)
+step13  M=    4  lower=1.5000000000 (err 5.00e-01)   mid=1.8750000000 (err 1.25e-01)
+step13  M=   16  lower=1.8750000000 (err 1.25e-01)   mid=1.9687500000 (err 3.12e-02)
+step13  M=   64  lower=1.9687500000 (err 3.12e-02)   mid=1.9921875000 (err 7.81e-03)
+step13  M=  256  lower=1.9921875000 (err 7.81e-03)   mid=1.9980468750 (err 1.95e-03)
+step13  M= 1024  lower=1.9980468750 (err 1.95e-03)   mid=1.9995117188 (err 4.88e-04)
+
+Thomae: Riemann sums with rational (midpoint) tags, irrational tags, and upper Darboux sums
+N=    10  midpoint tags 0.090000  left tags 0.270000  upper Darboux 0.456667  irrational tags 0
+N=   100  midpoint tags 0.013000  left tags 0.052000  upper Darboux 0.130811  irrational tags 0
+N=  1000  midpoint tags 0.001700  left tags 0.008500  upper Darboux 0.037365  irrational tags 0
+N= 10000  midpoint tags 0.000210  left tags 0.001260  upper Darboux 0.011081  irrational tags 0
+t=0.5: {f > t} has 2 points -> measure 0
+t=0.1: {f > t} has 29 points -> measure 0
+t=0.01: {f > t} has 3005 points -> measure 0
+t=0.001: {f > t} has 303793 points -> measure 0
+
+Dirichlet: rational tags give 1, irrational tags give 0, for every N
+cover of the first 10^5 rationals with lengths eps/2^(k+1): total 0.001 < eps = 0.001

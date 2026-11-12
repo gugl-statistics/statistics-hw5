@@ -1,0 +1,418 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Homework 5 - Riemann, Lebesgue and the Normal CDF</title>
+<meta name="description" content="Homework 5: Riemann vs Lebesgue numerical integration, and an efficient numerical method for the standard normal CDF.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="kicker">Homework 5 · Statistics</div>
+    <h1>Splitting the <span>domain</span> or the <span>range</span>,<br>and computing Φ(z) without a formula</h1>
+    <div class="meta">Alberto Guglielmotti · the demos run in the browser, the tables come from my Python code</div>
+  </div>
+</header>
+
+<nav class="toc"><div class="wrap">
+  <a href="#ideas">1.1 · Two ideas</a>
+  <a href="#demo">1.2 · Demo</a>
+  <a href="#results">1.3 · Results</a>
+  <a href="#patho">1.4 · Pathological</a>
+  <a href="#concl1">1.5 · Conclusions</a>
+  <a href="#liouville">2.1 · No formula</a>
+  <a href="#erf">2.2 · erf</a>
+  <a href="#methods">2.3 · Methods</a>
+  <a href="#accuracy">2.4 · Accuracy</a>
+  <a href="#speed">2.5 · Efficiency</a>
+  <a href="#concl2">2.6 · Conclusions</a>
+  <a href="#code">Code</a>
+</div></nav>
+
+<main>
+
+<!-- ============================================================ EX 1 -->
+<section id="ideas">
+  <h2><span class="num">1</span>Ex. 1 - Riemann and Lebesgue integration</h2>
+  <p class="lead">Two ways of adding up the area under a curve.</p>
+
+  <div class="two">
+    <div class="card">
+      <h4 style="margin-top:0;color:var(--orange)">Riemann: split the domain</h4>
+      <p>Cut [a, b] into N subintervals of width h = (b − a)/N, take the value of f at one point (the "tag") in each, and add up the rectangles:</p>
+      <p style="text-align:center"><span class="math">R<sub>N</sub> = Σ<sub>i</sub> f(ξ<sub>i</sub>)·h</span></p>
+      <p>f is Riemann integrable if the upper and lower (Darboux) sums have the same limit, i.e. the result doesn't depend on the tags. In the code I use the
+      midpoint of each subinterval as the tag.</p>
+    </div>
+    <div class="card">
+      <h4 style="margin-top:0;color:var(--orange)">Lebesgue: split the range</h4>
+      <p>Cut the set of values into levels <span class="math">0 = t<sub>0</sub> &lt; t<sub>1</sub> &lt; … &lt; t<sub>M</sub></span>, look at the preimage
+      <span class="math">E<sub>j</sub> = {x : t<sub>j</sub> ≤ f(x) &lt; t<sub>j+1</sub>}</span> of each band, and weight each level by the <b>measure</b> (total length) of its preimage:</p>
+      <p style="text-align:center"><span class="math">L<sub>M</sub> = Σ<sub>j</sub> t<sub>j</sub>·μ(E<sub>j</sub>)</span></p>
+      <p>This is the integral of a simple function below f; the Lebesgue integral is the sup over all of them.</p>
+    </div>
+  </div>
+  <p>The usual comparison is counting coins: Riemann goes through the coins in the order they are on the table and adds their values, Lebesgue first sorts them by
+  value and then counts how many there are of each kind. The second way doesn't care about the order of the points, only about "how much" of the domain has a given value.</p>
+
+  <h3>How I made the Lebesgue idea numerical</h3>
+  <p>Rearranging the sum by bands gives the "layer cake" formula, which for f ≥ 0 is exactly the Lebesgue integral:</p>
+  <p style="text-align:center"><span class="math big">∫ f dμ = ∫<sub>0</sub><sup>∞</sup> μ({x : f(x) &gt; t}) dt ≈ Σ<sub>j</sub> (t<sub>j+1</sub> − t<sub>j</sub>)·μ({f &gt; t<sub>j</sub>*})</span></p>
+  <p>So the only real work is computing the measure of a preimage <span class="math">{f &gt; t}</span>. My algorithm:</p>
+  <ol class="steps">
+    <li>Evaluate f once on a grid of K = 1,000 points, to find the range and to see roughly where f crosses each level t.</li>
+    <li>For every level t and every pair of grid points where <span class="math">f − t</span> changes sign, find the crossing point with 55 steps of bisection
+    (this gets it to machine precision, also for jumps).</li>
+    <li>The preimage <span class="math">{f &gt; t}</span> is then a union of intervals between crossings, and its measure is the sum of their lengths.</li>
+    <li>Use the middle of each band as t<sub>j</sub>* (the classical lower sum uses the top of the band and converges much more slowly, see the table in 1.3).</li>
+  </ol>
+  <p>For the unbounded function 1/√x I used M/2 equal bands up to f = 10 and M/2 geometric bands from 10 to 10¹², since the levels can go up to infinity;
+  the part above 10¹² contributes only <span class="math">∫<sub>10¹²</sub><sup>∞</sup> t<sup>−2</sup> dt = 10<sup>−12</sup></span>. All the functions in the list are ≥ 0; for a
+  function with negative parts one would integrate f⁺ and f⁻ separately.</p>
+</section>
+
+<hr>
+
+<section id="demo">
+  <h2><span class="num">1.2</span>See the two partitions</h2>
+  <p class="lead">Vertical strips vs horizontal bands, on the same function.</p>
+  <div class="card demo">
+    <span class="label">Try it</span>
+    <div class="row">
+      <div><label for="d-f">Function</label><select id="d-f"></select></div>
+      <div><label for="d-n">N = M = <b id="d-nv" class="hl">8</b> (strips / bands)</label><input id="d-n" type="range" min="2" max="60" value="8"></div>
+      <div><label for="d-band">highlight band <b id="d-bv" class="hl">4</b></label><input id="d-band" type="range" min="1" max="8" value="4"></div>
+    </div>
+    <div class="two">
+      <div><div class="ctitle">Riemann: N strips of the domain (value at the midpoint)</div><canvas class="plot tall" id="d-riemann"></canvas></div>
+      <div><div class="ctitle">Lebesgue: M bands of the range, preimage of the highlighted band in orange</div><canvas class="plot tall" id="d-lebesgue"></canvas></div>
+    </div>
+    <div class="table-wrap"><table id="d-table"></table></div>
+  </div>
+  <p style="font-size:15px;color:var(--muted)">In the Lebesgue picture each sky-blue rectangle is the set {f &gt; t} of one band (its width is the measure), stacked on top of each other.
+  The orange segment under the axis is the preimage of the highlighted level. It can be made of several separate pieces (try |x − 0.5|, where {f &gt; t} is two intervals), which a Riemann sum never has to think about.</p>
+</section>
+
+<hr>
+
+<section id="results">
+  <h2><span class="num">1.3</span>Accuracy, convergence and efficiency</h2>
+  <p class="lead">All seven functions, N = 11 up to 10,001 strips / bands (Python).</p>
+  <p>I used odd values of N on purpose: with an even N the point 0.5 is a grid point, and then the Riemann sum of the step functions is exact by luck.</p>
+
+  <div class="seg" id="r-f" style="flex-wrap:wrap"></div>
+  <canvas class="plot tall" id="r-chart"></canvas>
+  <div class="legend"><span><i style="background:var(--sky)"></i>Riemann (midpoint)</span><span><i style="background:var(--orange)"></i>Lebesgue (midpoint level)</span>
+    <span>x axis: number of function evaluations, y axis: absolute error (log-log)</span></div>
+  <div class="table-wrap"><table id="r-table"></table></div>
+
+  <h4>Summary at N = M = 10,001</h4>
+  <div class="table-wrap"><table id="r-summary"></table></div>
+
+  <h4>Lebesgue: lower sum vs midpoint of the band</h4>
+  <div class="table-wrap"><table id="r-lower"></table></div>
+
+  <h3>Do the two approaches converge to the same value?</h3>
+  <p><b>Yes, for every function in the list.</b> All the columns in the summary approach the exact value, and the differences between Riemann and Lebesgue go
+  to zero as N grows. This is what theory says: if f is Riemann integrable on [a, b], it is also Lebesgue integrable and the two integrals are equal. For 1/√x the
+  Riemann integral exists only as an improper integral (limit of ∫ from ε to 1), but it still converges to 2, just slowly.</p>
+
+  <h3>Where they behave differently</h3>
+  <ul>
+    <li><b>Smooth functions (sin, x², sin x/x): Riemann wins.</b> The midpoint rule has error O(1/N²): for sin it goes from 8.2·10⁻⁷ at N = 1,001 to 8.2·10⁻⁹ at
+    N = 10,001. The Lebesgue version converges more slowly, about O(M<sup>−1.5</sup>) (5.4·10⁻⁶ to 1.7·10⁻⁷). The reason is interesting: where f is flat (the top of
+    sin, x² near 0) the measure of {f &gt; t} changes very fast with t (for sin near the top it behaves like √(1 − t)), so the band midpoint rule loses accuracy there.
+    Riemann has the opposite problem: it struggles where f is steep. It's like the two methods are "dual" to each other.</li>
+    <li><b>Jumps: Lebesgue wins.</b> For the 0/1 step the Riemann sum is off by about h/2 (error 5·10⁻⁴ at N = 1,001, O(1/N)), because one strip contains the jump.
+    The Lebesgue sum is exact for any number of bands: the bisection finds the jump at 0.5 exactly, so every preimage {f &gt; t} = [0, 0.5) has the right length.
+    For the 1/3 step Lebesgue is also O(1/M), but only because one band straddles the value 1; with levels at the values of the function, {0, 1, 3}, two bands give
+    the exact answer.</li>
+    <li><b>The kink |x − 0.5|:</b> Riemann is O(1/N²) (2.5·10⁻⁷ at N = 1,001) because only the strip with the kink is wrong. Lebesgue is exact (up to rounding) since
+    μ({f &gt; t}) = 1 − 2t is a straight line in t, and the midpoint rule integrates straight lines exactly.</li>
+    <li><b>The unbounded 1/√x: Lebesgue wins by far.</b> Riemann converges like 1/√N (1.9·10⁻² at N = 1,001, 6.0·10⁻³ at N = 10,001: ×10 strips only gives
+    ×3.16), because the first strip misses most of the spike. For Lebesgue the function being unbounded is not a problem at all: μ({f &gt; t}) = min(1, 1/t²) has
+    finite area, and with 10,001 bands the error is 9.6·10⁻⁷.</li>
+    <li><b>Efficiency: Riemann is much cheaper.</b> Riemann needs N evaluations. My Lebesgue version needs the 1,001 grid points plus 55 bisection steps for each
+    crossing of each band, so 37 to 110 times more evaluations (1.1 million for sin with 10,001 bands) and about 300 times more time (0.5 s vs 1.5 ms). Per
+    evaluation Riemann is better on smooth functions, Lebesgue is better on jumps and on 1/√x.</li>
+  </ul>
+  <p>The real reason Lebesgue is expensive is that it needs the <b>preimages</b>, i.e. it has to solve f(x) = t, which numerically means root finding. When the
+  preimages are known exactly (like for monotone functions that can be inverted), it becomes very cheap. In one dimension, for normal functions, Riemann-type rules
+  (midpoint, trapezoid, Simpson) are the practical choice; the strength of Lebesgue is more theoretical (limits, convergence theorems, very irregular functions).</p>
+</section>
+
+<hr>
+
+<section id="patho">
+  <h2><span class="num">1.4</span>The pathological functions</h2>
+  <p class="lead">Where the two definitions really disagree.</p>
+
+  <h3>Dirichlet function: f = 1 on rationals, 0 on irrationals</h3>
+  <div class="card demo">
+    <span class="label">Try it</span>
+    <div class="row">
+      <div><label for="dir-n">N = <b id="dir-nv" class="hl">10</b> strips</label><input id="dir-n" type="range" min="1" max="4" step="1" value="1"></div>
+      <div><label>Tags</label><div class="seg" id="dir-tags"><button data-v="rat" class="on">rational (i + ½)/N</button><button data-v="irr">irrational (i + 1/√2)/N</button></div></div>
+    </div>
+    <div class="out" id="dir-out"></div>
+  </div>
+  <ul>
+    <li><b>Riemann:</b> every subinterval contains both rational and irrational points, so the upper Darboux sum is always 1 and the lower is always 0. With rational
+    tags the Riemann sum is 1, with irrational tags it's 0, for every N. The limit depends on the tags, so <b>the Dirichlet function is not Riemann integrable</b>.</li>
+    <li><b>Lebesgue:</b> there are only two levels. The preimage of 1 is ℚ ∩ [0, 1], which is countable, so it has measure 0: list the rationals as q<sub>1</sub>, q<sub>2</sub>, …
+    and cover q<sub>k</sub> with an interval of length ε/2<sup>k</sup>; the total length is at most ε for every ε &gt; 0. So
+    <span class="math">∫ f dμ = 1·μ(ℚ ∩ [0,1]) + 0·μ(irrationals) = 1·0 + 0·1 = 0</span>.</li>
+    <li><b>A numerical problem:</b> on a computer every floating point number is m/2<sup>k</sup>, i.e. rational. A naive implementation would say f = 1 everywhere and
+    integrate to 1. This function cannot even be represented with doubles, so for the demo I treat the tags symbolically (I know which ones are rational by construction).</li>
+  </ul>
+
+  <h3>Thomae's function: f(p/q) = 1/q in lowest terms, 0 on irrationals</h3>
+  <div class="two">
+    <div>
+      <div class="ctitle">Thomae's function (points p/q with q ≤ 60)</div>
+      <canvas class="plot tall" id="th-plot"></canvas>
+    </div>
+    <div>
+      <div class="card demo" style="margin-top:0">
+        <span class="label">Try it</span>
+        <label for="th-n">N = <b id="th-nv" class="hl">100</b> strips</label>
+        <input id="th-n" type="range" min="1" max="5" step="0.05" value="2">
+        <div class="out" id="th-out"></div>
+      </div>
+    </div>
+  </div>
+  <p>This one is Riemann integrable even though it is discontinuous at every rational point: it's continuous at the irrationals, and the set of discontinuities
+  (the rationals) has measure zero, which is exactly Lebesgue's criterion for Riemann integrability. I computed the sums with exact fractions (Python <span class="mono">Fraction</span>):</p>
+  <div class="table-wrap"><table id="th-table"></table></div>
+  <p>The upper Darboux sum needs the largest value of f in each strip, i.e. the fraction with the smallest denominator in [i/N, (i+1)/N]; I found it with a search on the
+  Stern-Brocot tree. All the sums go to 0, but slowly (the upper sum is still 0.011 at N = 10,000). The lower sums are always 0 and so are the sums with irrational tags.</p>
+  <p>The Lebesgue version is immediate: for every t &gt; 0 the set {f &gt; t} = {p/q : q &lt; 1/t} is <b>finite</b> (for t = 0.01 it has 3,005 points, for t = 0.001 it has
+  303,793 points), so its measure is 0, so every band contributes 0 and the integral is exactly 0 with any number of bands. Both definitions agree (0), but
+  Lebesgue gets there with no approximation at all.</p>
+
+  <h3>One more: the indicator of a "fat" Cantor set</h3>
+  <p>The Smith-Volterra-Cantor set is built like the Cantor set but removing smaller and smaller middle pieces (1/4, then 1/16 from each of the 2 remaining pieces, …),
+  so what is left is closed, contains no interval, and still has measure 1/2. Its indicator function is discontinuous at every point of the set, which has positive measure, so it is
+  <b>not Riemann integrable</b>: the lower Darboux sums are 0 (every strip contains a gap) and the upper sums tend to 1/2. The Lebesgue integral exists and is 1·(1/2) = 1/2.
+  This is a "nicer" example than Dirichlet, because the function is not crazy everywhere, it's just the indicator of a strange set.</p>
+</section>
+
+<hr>
+
+<section id="concl1">
+  <h2><span class="num">1.5</span>Conclusions for Ex. 1</h2>
+  <ul>
+    <li>For all the Riemann-integrable functions both numerical approaches converge to the same value, as the theory says.</li>
+    <li>Riemann (midpoint) is cheaper and more accurate for smooth functions; my Lebesgue version is better for jumps, kinks and especially the unbounded 1/√x, but it costs 37 to
+    110 times more function evaluations because of the root finding needed for the preimages.</li>
+    <li>The real difference shows up with the pathological functions: Dirichlet is not Riemann integrable but has Lebesgue integral 0; Thomae is integrable in both senses
+    (integral 0) but Lebesgue gets it exactly and immediately; the fat Cantor indicator is not Riemann integrable but has Lebesgue integral 1/2.</li>
+  </ul>
+</section>
+
+<hr>
+
+<!-- ============================================================ EX 2 -->
+<section id="liouville">
+  <h2><span class="num">2</span>Ex. 2 - Numerical computation of the normal CDF</h2>
+  <p class="lead">Why there is no formula, and what to do instead.</p>
+  <p>We want</p>
+  <p style="text-align:center"><span class="math big">Φ(z) = P(Z ≤ z) = ∫<sub>−∞</sub><sup>z</sup> (1/√(2π)) e<sup>−t²/2</sup> dt</span></p>
+  <p>The density is continuous, so by the fundamental theorem of calculus Φ is an antiderivative of it, and it certainly exists. The point is that it can't be written
+  with <b>elementary functions</b>: those obtained from x and constants with +, −, ×, ÷, roots, exp, log, and compositions of these (trigonometric functions are included, since
+  they can be written with complex exp and log). The notes linked in the assignment (Gardner's notes on Hogg, McKean and Craig, Section 3.4) make exactly this correction to the
+  textbook, which says that the integrand "does not have an antiderivative": it has one, just not an elementary one.</p>
+
+  <h3>Liouville's theorem</h3>
+  <p>Liouville proved in the 19th century that ∫e<sup>x²</sup>dx is not elementary; the modern algebraic version is explained in Rosenlicht's paper "Integration in finite terms"
+  (American Mathematical Monthly, 1972). The form that is useful here is a consequence of the general theorem:</p>
+  <div class="note"><b>Theorem (Liouville).</b> Let f(x) and g(x) be rational functions, with g not constant. Then ∫ f(x)·e<sup>g(x)</sup> dx is an elementary function
+  if and only if there is a rational function R(x) such that
+  <p style="text-align:center;margin:8px 0"><span class="math">f = R′ + R·g′</span></p>
+  and in that case ∫ f e<sup>g</sup> dx = R·e<sup>g</sup> + C.</div>
+  <p>The "if" part is easy (differentiate R e<sup>g</sup>). The deep part is the "only if": the theorem says that if the integral is elementary at all, it must have this very simple shape.</p>
+
+  <h3>Applying it to e<sup>−x²/2</sup></h3>
+  <p>Here f = 1 and g = −x²/2, so g′ = −x and we would need a rational R with</p>
+  <p style="text-align:center"><span class="math big">R′(x) − x·R(x) = 1</span></p>
+  <ol class="steps">
+    <li><b>R can't have a pole.</b> If R had a pole of order k ≥ 1 at some point a (possibly complex), then R′ would have a pole of order k + 1 at a, while x·R has a pole of order at
+    most k there. So R′ − xR would still have a pole at a, but the right side is the constant 1. Contradiction.</li>
+    <li><b>So R is a polynomial, and that doesn't work either.</b> If R = 0 the left side is 0 ≠ 1. If R has degree d ≥ 0, then x·R has degree d + 1 and R′ has degree d − 1,
+    so the left side has degree d + 1 ≥ 1 and can't be the constant 1.</li>
+  </ol>
+  <p>No such R exists, so ∫e<sup>−x²/2</sup>dx is not elementary. And Φ can't be elementary either: if it were, √(2π)·Φ would be an elementary antiderivative of e<sup>−x²/2</sup>.
+  The same argument with g = x² shows the classical case ∫e<sup>x²</sup>dx.</p>
+</section>
+
+<hr>
+
+<section id="erf">
+  <h2><span class="num">2.2</span>The error function</h2>
+  <p class="lead">Giving the integral a name.</p>
+  <p>Since the integral can't be expressed with the functions we already have, we define a new one:</p>
+  <p style="text-align:center"><span class="math big">erf(x) = (2/√π) ∫<sub>0</sub><sup>x</sup> e<sup>−s²</sup> ds, &nbsp;&nbsp; erfc(x) = 1 − erf(x)</span></p>
+  <p>With the substitution t = √2·s in the definition of Φ:</p>
+  <p style="text-align:center"><span class="math big">Φ(z) = ½ [1 + erf(z/√2)] = ½ erfc(−z/√2)</span></p>
+  <p>This is an <b>exact</b> analytical representation, in the same sense that ln x is "exact" even though it is defined as ∫<sub>1</sub><sup>x</sup> dt/t: once erf is accepted as a
+  special function with known properties (odd, erf(∞) = 1, derivative (2/√π)e<sup>−x²</sup>, series, asymptotic expansion…), Φ is a closed formula in terms of it. Also general
+  normal variables are covered: P(X ≤ x) = Φ((x − μ)/σ) for X ~ N(μ, σ²), and Φ(−z) = 1 − Φ(z).</p>
+  <p><b>But it doesn't compute anything by itself.</b> erf is just a name for the integral: to get the number erf(0.7) someone still has to evaluate it with a numerical method
+  (a series, a continued fraction, a rational approximation…). This is also true for exp, sin or log, but those are built into every language, and erf often isn't: for example
+  JavaScript's <span class="mono">Math</span> object has exp, log, sin, but no erf, so on this page every method is written by hand.</p>
+</section>
+
+<hr>
+
+<section id="methods">
+  <h2><span class="num">2.3</span>The methods I tried</h2>
+  <p class="lead">From the obvious ones to the one I'd actually use.</p>
+  <div class="table-wrap"><table>
+    <tr><th>Method</th><th>Formula</th><th>Notes</th></tr>
+    <tr><td>Trapezoid</td><td>Φ(z) = ½ + h[½φ(0) + φ(h) + … + φ((N−1)h) + ½φ(z)], h = z/N</td><td>error O(h²)</td></tr>
+    <tr><td>Simpson</td><td>same interval, weights 1, 4, 2, 4, …, 4, 1 times h/3</td><td>error O(h⁴)</td></tr>
+    <tr><td>Power series</td><td>Φ(z) = ½ + (1/√(2π)) Σ<sub>k≥0</sub> (−1)<sup>k</sup> z<sup>2k+1</sup> / (2<sup>k</sup>(2k+1)k!)</td><td>from the notes: expand e<sup>−t²/2</sup> and integrate term by term</td></tr>
+    <tr><td>Abramowitz &amp; Stegun 26.2.17</td><td>Q(x) = φ(x)(b<sub>1</sub>t + … + b<sub>5</sub>t<sup>5</sup>), t = 1/(1 + 0.2316419x)</td><td>classic approximation, |error| &lt; 7.5·10⁻⁸</td></tr>
+    <tr><td>Continued fraction</td><td>Q(x) = 1 − Φ(x) = φ(x) / (x + 1/(x + 2/(x + 3/(x + …))))</td><td>for the tail, x &gt; 0</td></tr>
+    <tr class="best"><td><b>Mine: series + continued fraction</b></td><td>series for |z| ≤ 2.5, continued fraction for |z| &gt; 2.5</td><td>full precision everywhere</td></tr>
+  </table></div>
+
+  <h3>Integration rules</h3>
+  <p>Integrating the density from 0 to z works fine and converges as expected: at z = 1.96, Simpson goes from 3.1·10⁻³ with 2 panels to 2.1·10⁻⁶ with 8 and
+  7·10⁻¹⁵ with 1,024 (×2 panels → error ÷16), the trapezoid from 9.0·10⁻³ to 3.5·10⁻⁸ (×2 → ÷4). The problem is cost (hundreds of exponentials for every value) and the
+  lower tail: for z = −8 the answer is 6·10⁻¹⁶ but the rule computes it as ½ minus a number very close to ½, so it gets only the absolute error right.</p>
+
+  <h3>The power series and its trap</h3>
+  <p>The series converges for every z (it's an alternating series, and once the terms start decreasing the error is at most the first omitted term). For small z it's
+  great: 11 terms at z = 0.5, 24 terms at z = 2, error ~10⁻¹⁶. But for large z the terms first grow a lot before decreasing: the biggest term is about
+  e<sup>z²/2</sup>-sized, while the result is between 0 and 1. With 16 significant digits, all the digits are lost in the cancellation:</p>
+  <div class="table-wrap"><table id="ser-table"></table></div>
+  <p>At z = 10 the series says Φ(10) ≈ 418, which is not even a probability. So the series alone is fine only up to |z| ≈ 3 or 4.</p>
+
+  <h3>The continued fraction for the tail</h3>
+  <p>For the tail I used the classical continued fraction of the Mills ratio, Q(x)/φ(x) = 1/(x + 1/(x + 2/(x + 3/(x + …)))), evaluated from the bottom up with a fixed depth n.
+  It converges faster the larger x is, which is exactly the opposite of the series:</p>
+  <div class="table-wrap"><table id="cf-table"></table></div>
+  <p>I used the depth n = 10 + 400/x², which is a bit more than needed everywhere. So the final method is: the series for |z| ≤ 2.5 (at most ~30 terms), the continued fraction
+  beyond (at most 74 levels, and only 14 at |z| = 10). For negative z the tail is computed directly, so Φ(−8) = 6.2·10⁻¹⁶ comes out with full relative precision instead of as a
+  difference of two numbers close to ½.</p>
+
+  <div class="card demo">
+    <span class="label">Calculator</span>
+    <label for="c-z">z = <b id="c-zv" class="hl">1.96</b></label>
+    <input id="c-z" type="range" min="-1000" max="1000" value="196">
+    <div class="btns">
+      <button class="ghost small" data-z="-8">−8</button><button class="ghost small" data-z="-3">−3</button><button class="ghost small" data-z="-1.96">−1.96</button>
+      <button class="ghost small" data-z="0">0</button><button class="ghost small" data-z="1">1</button><button class="ghost small" data-z="1.645">1.645</button>
+      <button class="ghost small" data-z="1.96">1.96</button><button class="ghost small" data-z="2.576">2.576</button><button class="ghost small" data-z="5">5</button>
+      <button class="ghost small" data-z="8">8</button><button class="ghost small" data-z="10">10</button>
+    </div>
+    <div class="table-wrap"><table id="c-table"></table></div>
+    <div class="out" id="c-note"></div>
+    <div class="ctitle" style="margin-top:12px">trapezoid and Simpson at this z: error vs number of panels</div>
+    <canvas class="plot" id="c-conv"></canvas>
+    <div class="legend"><span><i style="background:var(--sky)"></i>trapezoid</span><span><i style="background:var(--orange)"></i>Simpson</span></div>
+  </div>
+</section>
+
+<hr>
+
+<section id="accuracy">
+  <h2><span class="num">2.4</span>Accuracy</h2>
+  <p class="lead">Against a 40-digit reference and against values from the web.</p>
+  <p>As the "exact" value I used Python's <span class="mono">mpmath</span> library with 40 to 50 significant digits. All errors below are computed against it on the grid z = −10, −9.95, …, 10.</p>
+  <canvas class="plot tall" id="acc-chart"></canvas>
+  <div class="legend" id="acc-legend"></div>
+  <div class="seg" id="acc-mode" style="margin-top:8px"><button data-v="rel" class="on">relative error, lower tail</button><button data-v="abs">absolute error</button></div>
+  <div class="table-wrap"><table id="acc-table"></table></div>
+  <ul>
+    <li>A&amp;S 26.2.17 is good to 7.4·10⁻⁸ in absolute terms, as advertised, but its relative error in the tail is bad (2% at z = −10), so it's fine for a z-table and not for
+    tiny p-values.</li>
+    <li>The power series and the integration rules are accurate in the middle but completely wrong in the far tail (relative errors above 1).</li>
+    <li>My method has a max absolute error of 4·10⁻¹⁶ and a max relative error of 5.9·10⁻¹⁴ in the lower tail, close to the C library (<span class="mono">math.erfc</span>, 1.2·10⁻¹⁴).
+    The worst point is z = −2.5, right where the series stops: Φ(−2.5) = 0.0062 is obtained as ½ minus the series, which loses about 2 digits. Moving the switch lower would fix it,
+    at the cost of a longer continued fraction.</li>
+  </ul>
+
+  <h3>Comparison with values found on the web</h3>
+  <p>I used the standard normal table on Wikipedia (5 decimals for Φ, 6 significant digits for the far tail 1 − Φ(z) at integer z) and the "68-95-99.7 rule" page, which gives
+  P(|Z| &lt; 0.5) = 0.382924922548026 and P(|Z| &lt; 1) = 0.682689492137086 with 15 digits, i.e. Φ(z) = (1 + P)/2.</p>
+  <div class="table-wrap"><table id="web-table"></table></div>
+  <p>Every value agrees with the web to all the digits printed there. The two 15-digit values match my method to the last digit, and the tail values down to 6.22·10⁻¹⁶ at z = 8
+  match to 6 significant digits.</p>
+</section>
+
+<hr>
+
+<section id="speed">
+  <h2><span class="num">2.5</span>Efficiency</h2>
+  <p class="lead">Time per evaluation.</p>
+  <div class="table-wrap"><table id="sp-table"></table></div>
+  <div class="card demo">
+    <span class="label">Try it</span>
+    <p style="margin-top:0">Times 200,000 evaluations of each method in the browser, at random z in [−6, 6].</p>
+    <div class="btns"><button id="sp-run">Run benchmark</button></div>
+    <div class="table-wrap"><table id="sp-js"></table></div>
+  </div>
+  <ul>
+    <li>The integration rules are the slowest because they evaluate the density (an exponential) about 100 times per value, and they are still not very accurate.</li>
+    <li>The series needs up to ~30 terms in its range and a couple of hundred outside it (where it's wrong anyway).</li>
+    <li>A&amp;S is the fastest pure implementation (one exponential and a degree-5 polynomial) but only to ~7 digits.</li>
+    <li>Mine is about 2.5 times faster than the series in Python and gives full precision. It is still slower than the C library, which is compiled and uses rational
+    approximations (a fixed number of operations, no loops), but in the browser it takes around a tenth of a microsecond per value, which is more than enough.</li>
+  </ul>
+</section>
+
+<hr>
+
+<section id="concl2">
+  <h2><span class="num">2.6</span>Conclusions for Ex. 2</h2>
+  <ul>
+    <li>Φ has an antiderivative but not an elementary one: by Liouville's theorem, ∫e<sup>−x²/2</sup> would have to be R·e<sup>−x²/2</sup> with R′ − xR = 1, and no rational R does that.</li>
+    <li>erf gives Φ(z) = ½[1 + erf(z/√2)], an exact formula, but erf is defined by the same integral, so its values still need a numerical method.</li>
+    <li>Integration rules and the power series work in the centre but fail in the tails because of cancellation; A&amp;S is fast but limited to ~7 digits; the continued fraction is very good
+    in the tails and bad near 0. Combining the series (|z| ≤ 2.5) with the continued fraction (|z| &gt; 2.5) gives near machine precision everywhere, agrees with the web
+    tables to every printed digit, and is fast.</li>
+  </ul>
+  <p style="font-size:15px;color:var(--muted)">A small note on the notes: on page 6 the standardization is written z = (x − μ)/σ², it should be (x − μ)/σ, and the exponent in the definition of Φ is
+  written −t/2 instead of −t²/2.</p>
+</section>
+
+<hr>
+
+<section id="code">
+  <h2><span class="num">&lt;/&gt;</span>Code and references</h2>
+  <ul>
+    <li><a href="code/ex1_integration.py"><code>code/ex1_integration.py</code></a> - Riemann and Lebesgue sums, the convergence experiment, Thomae and Dirichlet with exact fractions.
+    Output: <a href="code/ex1_output.txt"><code>ex1_output.txt</code></a>.</li>
+    <li><a href="code/ex2_normal_cdf.py"><code>code/ex2_normal_cdf.py</code></a> - all the methods for Φ, the comparison with mpmath and with the web values, the timings.
+    Output: <a href="code/ex2_output.txt"><code>ex2_output.txt</code></a>.</li>
+    <li><a href="code/export_data.py"><code>code/export_data.py</code></a> - writes the results and the reference values used by this page.</li>
+    <li><a href="js/integrate.js"><code>js/integrate.js</code></a>, <a href="js/normal.js"><code>js/normal.js</code></a> - the same methods in JavaScript, used by the demos.</li>
+  </ul>
+  <h4>References</h4>
+  <ul class="refs">
+    <li>R. Gardner, notes on Hogg, McKean and Craig, <i>Introduction to Mathematical Statistics</i>, Section 3.4 The Normal Distribution (ETSU) -
+      <a href="https://faculty.etsu.edu/gardnerr/4047/notes-Hogg-McKean-Craig/Hogg-McKean-Craig-3-4.pdf">link</a></li>
+    <li>M. Rosenlicht, "Integration in Finite Terms", <i>American Mathematical Monthly</i> 79(9), 963-972, 1972.</li>
+    <li>M. Abramowitz and I. Stegun, <i>Handbook of Mathematical Functions</i>, formula 26.2.17.</li>
+    <li>Wikipedia, "Standard normal table" and "68-95-99.7 rule" (reference values in 2.4).</li>
+  </ul>
+</section>
+
+</main>
+
+<footer>Homework 5 · Alberto Guglielmotti · Statistics</footer>
+
+<script src="js/results.js"></script>
+<script src="js/integrate.js"></script>
+<script src="js/normal.js"></script>
+<script src="js/charts.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
